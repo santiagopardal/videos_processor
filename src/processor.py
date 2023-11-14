@@ -1,17 +1,18 @@
 from pika import BlockingConnection, ConnectionParameters, PlainCredentials
 import os
 
-
-CAMERAS_TO_HANDLE = []
+# TODO fetch the cameras I am going to handle
+CAMERAS_TO_HANDLE = [1, 2, 3, 4]
 
 
 def main():
     credentials = PlainCredentials(username=os.environ.get('RABBIT_USER'), password=os.environ.get('RABBIT_PASSWORD'))
     connection = BlockingConnection(ConnectionParameters(host=os.environ.get('RABBIT_HOST'), credentials=credentials))
     channel = connection.channel()
+    channel.queue_declare(queue='videos_to_merge')
 
     for camera_id in CAMERAS_TO_HANDLE:
-        channel.queue_bind(exchange='camerai', queue='videos_to_merge', routing_key=camera_id)
+        channel.queue_bind(exchange='camerai', queue='videos_to_merge', routing_key=f"{camera_id}")
 
     def callback(ch, method, properties, body):
         print(f" [x] Received {body}")
