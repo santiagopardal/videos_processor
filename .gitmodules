@@ -1,0 +1,3 @@
+[submodule "libs/VideosMerger"]
+	path = libs/VideosMerger
+	url = git@github.com:santiagopardal/VideosMerger.git
