@@ -4,7 +4,7 @@ use std::env;
 
 
 pub async fn call_api(endpoint: &str) -> serde_json::Value {
-    let base_path_unwrapped: String =  env::var("API_URL").unwrap();
+    let base_path_unwrapped: String = env::var("API_URL").unwrap();
     let base_path = base_path_unwrapped.as_str();
     let mut url: String = String::new();
     url.push_str(base_path);
