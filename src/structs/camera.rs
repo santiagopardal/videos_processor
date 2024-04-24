@@ -4,6 +4,7 @@ pub struct CameraConfigurations {
 }
 
 pub struct Camera {
+    pub id: u32,
     pub model: String,
     pub ip: String,
     pub http_port: u16,
@@ -25,6 +26,7 @@ pub fn build_from_json(camera_json: &serde_json::Value) -> Camera {
         recording: camera_json["configurations"]["recording"].as_bool().unwrap(),
     };
     return Camera {
+        id: camera_json["id"].as_i64().unwrap() as u32,
         model: String::from(camera_json["model"].as_str().unwrap()),
         ip: String::from(camera_json["ip"].as_str().unwrap()),
         http_port: camera_json["http_port"].as_i64().unwrap() as u16,
