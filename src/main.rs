@@ -65,7 +65,7 @@ async fn main() {
         .unwrap();
 
     for camera in cameras {
-        let exchange_name = "test_exchange";
+        let exchange_name = "camerai";
         println!("Binding camera '{}' with id: {}", camera.name, camera.id);
         channel
             .queue_bind(QueueBindArguments::new(
