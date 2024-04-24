@@ -8,7 +8,7 @@ pub struct Camera {
     pub model: String,
     pub ip: String,
     pub http_port: u16,
-    pub streaming_port: u16,
+    pub streaming_port: Option<u16>,
     pub user: String,
     pub password: String,
     pub width: u16,
@@ -25,12 +25,22 @@ pub fn build_from_json(camera_json: &serde_json::Value) -> Camera {
         sensitivity: camera_json["configurations"]["sensitivity"].as_f64().unwrap() as f32,
         recording: camera_json["configurations"]["recording"].as_bool().unwrap(),
     };
+    let streaming_port: Option<u16>;
+
+    if camera_json["streaming_port"].as_i64().is_some() {
+        streaming_port = Option::Some(
+            camera_json["streaming_port"].as_i64().unwrap() as u16
+        )
+    } else {
+        streaming_port = Option::None;
+    }
+
     return Camera {
         id: camera_json["id"].as_i64().unwrap() as u32,
         model: String::from(camera_json["model"].as_str().unwrap()),
         ip: String::from(camera_json["ip"].as_str().unwrap()),
         http_port: camera_json["http_port"].as_i64().unwrap() as u16,
-        streaming_port: camera_json["streaming_port"].as_i64().unwrap() as u16,
+        streaming_port,
         user: String::from(camera_json["user"].as_str().unwrap()),
         password: String::from(camera_json["password"].as_str().unwrap()),
         width: camera_json["width"].as_i64().unwrap() as u16,
