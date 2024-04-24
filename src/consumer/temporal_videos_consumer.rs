@@ -3,6 +3,7 @@ use amqprs::consumer::AsyncConsumer;
 use amqprs::{BasicProperties, Deliver};
 use async_trait::async_trait;
 use std::str;
+use serde_json;
 
 pub struct TemporalVideosConsumer;
 
@@ -26,7 +27,7 @@ impl AsyncConsumer for TemporalVideosConsumer {
             Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
         };
 
-        let json_data = json::parse(s).unwrap();
+        let json_data: serde_json::Value = serde_json::from_str(&s).unwrap();
 
         println!("Message is: '{}'", s);
         println!("JSON is: '{}'", json_data);
