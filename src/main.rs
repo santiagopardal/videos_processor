@@ -28,6 +28,7 @@ async fn main() {
     let rabbit_host = env::var("RABBIT_HOST").unwrap();
     let rabbit_user = env::var("RABBIT_USER").unwrap();
     let rabbit_password = env::var("RABBIT_PASSWORD").unwrap();
+    let exchange_name = env::var("EXCHANGE_NAME").unwrap();
 
     let cameras: Vec<structs::camera::Camera> = api::cameras::get_all_cameras().await;
 
@@ -65,12 +66,11 @@ async fn main() {
         .unwrap();
 
     for camera in cameras {
-        let exchange_name = "camerai";
         println!("Binding camera '{}' with id: {}", camera.name, camera.id);
         channel
             .queue_bind(QueueBindArguments::new(
                 &queue_name,
-                exchange_name,
+                exchange_name.as_str(),
                 &camera.id.to_string(),
             ))
             .await
