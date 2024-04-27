@@ -1543,6 +1543,7 @@ version = "0.1.0"
 dependencies = [
  "amqprs",
  "async-trait",
+ "prost",
  "reqwest",
  "serde_json",
  "tokio",
