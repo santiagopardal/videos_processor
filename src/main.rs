@@ -21,6 +21,7 @@ use consumer::temporal_videos_consumer::TemporalVideosConsumer;
 pub mod consumer;
 pub mod api;
 pub mod structs;
+pub mod node;
 
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]

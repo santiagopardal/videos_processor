@@ -1,2 +1,2 @@
-mod cameras;
+pub mod cameras;
 mod api;
