@@ -1,5 +1,6 @@
 use proto::node_client::NodeClient;
 use String;
+use tonic;
 
 mod proto {
     tonic::include_proto!("node");
@@ -19,19 +20,19 @@ impl Node {
     }
 
     pub async fn turn_off(&self) -> Result<(), tonic::transport::Error> {
-        let mut node = NodeClient::connect(
+        let mut local_node = NodeClient::connect(
             self.get_connection_string()
         ).await?;
 
-        //let request = proto::
+        let request = tonic::Request::new(());
 
-        //let stop_result = node.stop(request).await.unwrap();
+        local_node.stop(request).await;
 
         return Ok(())
     }
 
     fn get_connection_string(&self) -> String {
-        let mut connection_string: String = String::from("grpc://");
+        let mut connection_string: String = String::from("http://");
         connection_string.push_str(self.host.as_str());
         connection_string.push(':');
         connection_string.push_str(&self.port.to_string());
