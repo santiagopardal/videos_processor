@@ -82,8 +82,10 @@ async fn main() {
         .manual_ack(true)
         .finish();
 
+    let consumer = TemporalVideosConsumer::new().await;
+
     channel
-        .basic_consume(TemporalVideosConsumer::new(), args)
+        .basic_consume(consumer, args)
         .await
         .unwrap();
 

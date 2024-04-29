@@ -8,39 +8,45 @@ mod proto {
 
 pub struct Node {
     host: String,
-    port: u16
+    port: u16,
+    client: Option<NodeClient<tonic::transport::Channel>>
 }
 
 impl Node {
     pub fn new(host: &str, port: u16) -> Self {
         return Self {
             host: String::from(host),
-            port
+            port,
+            client: None
         }
     }
 
-    pub async fn turn_off(&self) -> Result<(), tonic::transport::Error> {
-        let mut local_node = NodeClient::connect(
-            self.get_connection_string()
-        ).await?;
+    pub async fn connect(&mut self) {
+        if self.client.is_none() {
+            self.client = Some(
+                NodeClient::connect(
+                    self.get_connection_string()
+                ).await.unwrap()
+            )
+        }
+    }
 
+    pub async fn turn_off(&mut self) -> Result<(), tonic::transport::Error> {
+        let local_node = self.client.as_mut().unwrap();
         let request = tonic::Request::new(());
 
-        local_node.stop(request).await;
+        let _ = local_node.stop(request).await;
 
         return Ok(())
     }
 
-    pub async fn stream_video(&self, video_id: u32) -> Result<(), tonic::transport::Error> {
-        let mut local_node = NodeClient::connect(
-            self.get_connection_string()
-        ).await?;
-
+    pub async fn stream_video(&mut self, video_id: u32) -> Result<(), tonic::transport::Error> {
+        let local_node = self.client.as_mut().unwrap();
         let request = tonic::Request::new(
-            proto::StreamVideoRequest { video_id: video_id }
+            proto::StreamVideoRequest { video_id }
         );
 
-        local_node.stream_video(request).await;
+        let _ = local_node.stream_video(request).await.unwrap();
 
         return Ok(())
     }

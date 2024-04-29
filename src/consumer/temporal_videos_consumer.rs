@@ -4,13 +4,17 @@ use amqprs::{BasicProperties, Deliver};
 use async_trait::async_trait;
 use std::str;
 use serde_json;
-use crate::node;
+use crate::node::node::Node;
 
-pub struct TemporalVideosConsumer;
+pub struct TemporalVideosConsumer {
+    node: Node
+}
 
 impl TemporalVideosConsumer {
-    pub fn new() -> Self {
-        return Self;
+    pub async fn new() -> Self {
+        let mut node = Node::new("127.0.0.1", 50051);
+        node.connect().await;
+        return Self { node };
     }
 }
 
@@ -33,9 +37,9 @@ impl AsyncConsumer for TemporalVideosConsumer {
         println!("Message is: '{}'", s);
         println!("JSON is: '{}'", json_data);
 
-        let local_node = node::node::Node::new("192.168.100.9", 50051);
         let id = json_data["video_id"].as_i64().unwrap();
-        local_node.stream_video(id as u32).await;
+        self.node.connect().await;
+        self.node.stream_video(id as u32).await.unwrap();
 
         let args = BasicAckArguments::new(deliver.delivery_tag(), false);
         channel.basic_ack(args).await.unwrap();
