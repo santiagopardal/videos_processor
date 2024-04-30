@@ -1,7 +1,16 @@
-FROM python:3.11.4-slim
+FROM rust:latest AS builder
 
-WORKDIR /videos_processor
+WORKDIR /usr/videos_processor
 
 COPY . .
 
-CMD ["python", "-m", "src.processor"]
+RUN apt update
+RUN apt install -y protobuf-compiler
+
+RUN cargo install --path .
+
+FROM ubuntu:latest
+
+COPY --from=builder /usr/local/cargo/bin/videos_processor /usr/local/bin/videos_processor
+
+CMD ["videos_processor"]
