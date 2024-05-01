@@ -1,6 +1,10 @@
+use std::fs;
+use std::io::Write;
 use proto::node_client::NodeClient;
+use proto::StreamVideoRequest;
 use String;
 use tonic;
+use tonic::codegen::tokio_stream::StreamExt;
 
 mod proto {
     tonic::include_proto!("node");
@@ -40,15 +44,25 @@ impl Node {
         return Ok(())
     }
 
-    pub async fn stream_video(&mut self, video_id: u32) -> Result<(), tonic::transport::Error> {
+    pub async fn stream_video(&mut self, path: &str) {
         let local_node = self.client.as_mut().unwrap();
-        let request = tonic::Request::new(
-            proto::StreamVideoRequest { video_id }
-        );
 
-        let _ = local_node.stream_video(request).await.unwrap();
+        let request = StreamVideoRequest { path: String::from(path) };
+        let mut stream = local_node.stream_video(request)
+            .await
+            .unwrap()
+            .into_inner();
 
-        return Ok(())
+        let mut video: Vec<u8> = vec![];
+
+        while let Some(item) = stream.next().await {
+            let mut unwrapped_item = item.unwrap();
+            video.append(&mut unwrapped_item.data);
+        }
+
+        let file_name = path.split('/').last().unwrap();
+        let mut file = fs::File::create(&file_name).unwrap();
+        let _ = file.write(&video).unwrap();
     }
 
     fn get_connection_string(&self) -> String {

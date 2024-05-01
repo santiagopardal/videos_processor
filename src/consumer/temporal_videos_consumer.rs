@@ -37,9 +37,9 @@ impl AsyncConsumer for TemporalVideosConsumer {
         println!("Message is: '{}'", s);
         println!("JSON is: '{}'", json_data);
 
-        let id = json_data["video_id"].as_i64().unwrap();
+        let path = json_data["path"].as_str().unwrap();
         self.node.connect().await;
-        self.node.stream_video(id as u32).await.unwrap();
+        self.node.stream_video(path).await;
 
         let args = BasicAckArguments::new(deliver.delivery_tag(), false);
         channel.basic_ack(args).await.unwrap();
