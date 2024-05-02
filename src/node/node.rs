@@ -1,5 +1,3 @@
-use std::fs;
-use std::io::Write;
 use proto::node_client::NodeClient;
 use proto::StreamVideoRequest;
 use String;
@@ -44,7 +42,7 @@ impl Node {
         return Ok(())
     }
 
-    pub async fn stream_video(&mut self, path: &str) {
+    pub async fn get_video(&mut self, path: &str) -> Vec<u8> {
         let local_node = self.client.as_mut().unwrap();
 
         let request = StreamVideoRequest { path: String::from(path) };
@@ -60,9 +58,7 @@ impl Node {
             video.append(&mut unwrapped_item.data);
         }
 
-        let file_name = path.split('/').last().unwrap();
-        let mut file = fs::File::create(&file_name).unwrap();
-        let _ = file.write(&video).unwrap();
+        return video;
     }
 
     fn get_connection_string(&self) -> String {
