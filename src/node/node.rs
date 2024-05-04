@@ -54,10 +54,11 @@ impl Node {
     }
 
     fn get_connection_string(&self) -> String {
-        let mut connection_string: String = String::from("http://");
-        connection_string.push_str(self.host.as_str());
-        connection_string.push(':');
-        connection_string.push_str(&self.port.to_string());
+        // let mut connection_string: String = String::from("grcp://[") + self.host.as_str() +
+        //     "]:"  +
+        //     &self.port.to_string();
+        let connection_string = String::from("http://192.168.100.9:50051");
+        println!("{}", connection_string);
         return connection_string
     }
 }

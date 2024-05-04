@@ -10,6 +10,8 @@ use tokio;
 use tokio::io::AsyncWriteExt;
 use std::collections::HashMap;
 use std::hash::Hash;
+use api::node;
+use crate::api;
 
 pub struct TemporalVideosConsumer {
     node: HashMap<u32, Node>
@@ -35,7 +37,8 @@ impl TemporalVideosConsumer {
 
     async fn get_node(&mut self, node_id: u32) -> &mut Node {
         if !self.node.contains_key(&node_id) {
-            self.node.insert(node_id, Node::new("localhost", 50051));
+            let fetched_node = node::get_node(node_id).await;
+            self.node.insert(node_id, fetched_node);
         }
 
         let node = self.node.get_mut(&node_id).unwrap();
