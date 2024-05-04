@@ -20,11 +20,8 @@ async fn save_video(data: Vec<u8>, camera_id: u32, video_date: &str, video_time:
 
     tokio::fs::create_dir_all(&path).await.unwrap();
 
-    let mut file_name = String::from(video_time);
-    file_name.push_str(".mp4");
-
     let mut video_file = tokio::fs::File::create(
-        path.join(file_name)
+        path.join(video_time + ".mp4")
     ).await.unwrap();
 
     video_file.write_all(&data).await.unwrap();
