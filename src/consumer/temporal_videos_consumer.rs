@@ -54,12 +54,8 @@ impl AsyncConsumer for TemporalVideosConsumer {
         _basic_properties: BasicProperties,
         content: Vec<u8>,
     ) {
-        let s: &str = match str::from_utf8(&content) {
-            Ok(v) => v,
-            Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
-        };
-
-        let json_data: serde_json::Value = serde_json::from_str(&s).unwrap();
+        let message: &str = str::from_utf8(&content).unwrap();
+        let json_data: serde_json::Value = serde_json::from_str(&message).unwrap();
 
         let node_id = json_data["node"].as_i64().unwrap() as u32;
         let camera_id = json_data["camera"].as_i64().unwrap() as u32;
