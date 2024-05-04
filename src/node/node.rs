@@ -23,39 +23,31 @@ impl Node {
         }
     }
 
-    pub async fn connect(&mut self) {
+    pub async fn connect(&mut self) -> Result<(), tonic::transport::Error> {
         if self.client.is_none() {
             self.client = Some(
                 NodeClient::connect(
                     self.get_connection_string()
-                ).await.unwrap()
+                ).await?
             )
         }
-    }
 
-    pub async fn turn_off(&mut self) -> Result<(), tonic::transport::Error> {
-        let local_node = self.client.as_mut().unwrap();
-        let request = tonic::Request::new(());
-
-        let _ = local_node.stop(request).await;
-
-        return Ok(())
+        Ok(())
     }
 
     pub async fn get_video(&mut self, path: &str) -> Vec<u8> {
-        let local_node = self.client.as_mut().unwrap();
-
         let request = StreamVideoRequest { path: String::from(path) };
-        let mut stream = local_node.stream_video(request)
-            .await
-            .unwrap()
+
+        let mut stream = self.client.as_mut().unwrap()
+            .stream_video(request)
+            .await.unwrap()
             .into_inner();
 
         let mut video: Vec<u8> = vec![];
 
-        while let Some(item) = stream.next().await {
-            let mut unwrapped_item = item.unwrap();
-            video.append(&mut unwrapped_item.data);
+        while let Some(response) = stream.next().await {
+            let mut unwrapped_response  = response.unwrap();
+            video.append(&mut unwrapped_response.data);
         }
 
         return video;

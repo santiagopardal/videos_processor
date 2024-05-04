@@ -8,9 +8,11 @@ use serde_json;
 use crate::node::node::Node;
 use tokio;
 use tokio::io::AsyncWriteExt;
+use std::collections::HashMap;
+use std::hash::Hash;
 
 pub struct TemporalVideosConsumer {
-    node: Node
+    node: HashMap<u32, Node>
 }
 
 async fn save_video(data: Vec<u8>, camera_id: u32, video_date: &str, video_time: String) {
@@ -30,9 +32,19 @@ async fn save_video(data: Vec<u8>, camera_id: u32, video_date: &str, video_time:
 
 impl TemporalVideosConsumer {
     pub async fn new() -> Self {
-        let mut node = Node::new("192.168.100.9", 50051);
-        node.connect().await;
+        let mut node = HashMap::new();
         return Self { node };
+    }
+
+    async fn get_node(&mut self, node_id: u32) -> &mut Node {
+        if !self.node.contains_key(&node_id) {
+            self.node.insert(node_id, Node::new("localhost", 50051));
+        }
+
+        let node = self.node.get_mut(&node_id).unwrap();
+        let _ = node.connect().await.expect("Error connecting to node");
+
+        return node;
     }
 }
 
@@ -52,14 +64,15 @@ impl AsyncConsumer for TemporalVideosConsumer {
 
         let json_data: serde_json::Value = serde_json::from_str(&s).unwrap();
 
-        let _ = json_data["node"].as_i64().unwrap() as u32;
+        let node_id = json_data["node"].as_i64().unwrap() as u32;
         let camera_id = json_data["camera"].as_i64().unwrap() as u32;
         let path = json_data["path"].as_str().unwrap();
         let video_date = json_data["date"].as_str().unwrap();
         let video_time = json_data["time"].as_str().unwrap().replace(":", "-");
 
-        self.node.connect().await;
-        let video_bytes = self.node.get_video(path).await;
+        let mut node: &mut Node = self.get_node(node_id).await;
+
+        let video_bytes = node.get_video(path).await;
 
         save_video(video_bytes, camera_id, video_date, video_time).await;
 
