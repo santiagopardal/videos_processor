@@ -33,6 +33,10 @@ async fn main() {
 
     let cameras: Vec<structs::camera::Camera> = api::cameras::get_all_cameras().await;
 
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     tracing_subscriber::registry()
         .with(fmt::layer())
         .try_init()
