@@ -47,7 +47,7 @@ pub fn build_from_json(camera_json: &serde_json::Value) -> Camera {
         height: camera_json["height"].as_i64().unwrap() as u16,
         framerate: camera_json["framerate"].as_i64().unwrap() as u16,
         name: String::from(camera_json["name"].as_str().unwrap()),
-        node: camera_json["node"].as_i64().unwrap() as u32,
+        node: camera_json["nodeId"].as_i64().unwrap() as u32,
         configurations: camera_configurations
     };
 }

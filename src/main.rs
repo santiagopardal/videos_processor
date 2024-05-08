@@ -60,8 +60,11 @@ async fn main() {
         .await
         .unwrap();
 
+    let mut queue = QueueDeclareArguments::new("testing_queue");
+    queue.durable(true);
+
     let (queue_name, _, _) = channel
-        .queue_declare(QueueDeclareArguments::new("testing_queue"))
+        .queue_declare(queue)
         .await
         .unwrap()
         .unwrap();
