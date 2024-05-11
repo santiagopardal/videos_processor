@@ -46,8 +46,8 @@ impl Node {
         let mut video: Vec<u8> = vec![];
 
         while let Some(response) = stream.next().await {
-            let mut unwrapped_response  = response.unwrap();
-            video.append(&mut unwrapped_response.data);
+            let mut unwrapped_response = response.unwrap();
+            video.append(&mut unwrapped_response);
         }
 
         return video;
