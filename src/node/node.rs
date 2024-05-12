@@ -3,6 +3,8 @@ use proto::StreamVideoRequest;
 use String;
 use tonic;
 use tonic::codegen::tokio_stream::StreamExt;
+use std::time::Instant;
+use log;
 
 mod proto {
     tonic::include_proto!("node");
@@ -36,6 +38,7 @@ impl Node {
     }
 
     pub async fn get_video(&mut self, path: &str) -> Vec<u8> {
+        let now = Instant::now();
         let request = StreamVideoRequest { path: String::from(path) };
 
         let mut stream = self.client.as_mut().unwrap()
@@ -50,6 +53,10 @@ impl Node {
             video.append(&mut unwrapped_response);
         }
 
+        let elapsed_time = now.elapsed();
+        log::info!("It took {:.2?} seconds to download a temporal video of size: {} bytes",
+            elapsed_time, video.len());
+
         return video;
     }
 
@@ -58,7 +65,6 @@ impl Node {
         //     "]:"  +
         //     &self.port.to_string();
         let connection_string = String::from("http://192.168.100.9:50051");
-        println!("{}", connection_string);
         return connection_string
     }
 }
