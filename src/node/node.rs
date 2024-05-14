@@ -1,10 +1,9 @@
 use proto::node_client::NodeClient;
 use proto::StreamVideoRequest;
+use crate::node::errors::VideoDownloadError;
 use String;
 use tonic;
 use tonic::codegen::tokio_stream::StreamExt;
-use std::time::Instant;
-use log;
 
 mod proto {
     tonic::include_proto!("node");
@@ -37,33 +36,24 @@ impl Node {
         Ok(())
     }
 
-    pub async fn get_video(&mut self, path: &str) -> Vec<u8> {
-        let now = Instant::now();
-        let request = StreamVideoRequest { path: String::from(path) };
+    pub async fn get_video(&mut self, path: &str) -> Result<Vec<u8>, VideoDownloadError> {
+        let client = self.client.as_mut().unwrap();
 
-        let mut stream = self.client.as_mut().unwrap()
-            .stream_video(request)
-            .await.unwrap()
-            .into_inner();
+        let request = StreamVideoRequest { path: String::from(path) };
+        let mut stream = client.stream_video(request).await?.into_inner();
 
         let mut video: Vec<u8> = vec![];
 
         while let Some(response) = stream.next().await {
-            let mut unwrapped_response = response.unwrap();
+            let mut unwrapped_response = response?;
             video.append(&mut unwrapped_response);
         }
 
-        let elapsed_time = now.elapsed();
-        log::info!("It took {:.2?} seconds to download a temporal video of size: {} bytes",
-            elapsed_time, video.len());
-
-        return video;
+        Ok(video)
     }
 
     fn get_connection_string(&self) -> String {
-        // let mut connection_string: String = String::from("grcp://[") + self.host.as_str() +
-        //     "]:"  +
-        //     &self.port.to_string();
+        //String::from("grcp://[") + self.host.as_str() + "]:"  + &self.port.to_string()
         let connection_string = String::from("http://192.168.100.9:50051");
         return connection_string
     }
