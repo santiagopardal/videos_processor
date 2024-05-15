@@ -1,2 +1,2 @@
 pub mod node;
-pub mod errors;
+pub mod video_download_error;

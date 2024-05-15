@@ -9,7 +9,7 @@ use crate::node::node::Node;
 use tokio;
 use tokio::io::AsyncWriteExt;
 use std::collections::HashMap;
-use consumer::errors::MessageHandlingError;
+use consumer::message_handling_error::MessageHandlingError;
 use api::node;
 use crate::{api, consumer};
 

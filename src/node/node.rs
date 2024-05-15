@@ -1,6 +1,6 @@
 use proto::node_client::NodeClient;
 use proto::StreamVideoRequest;
-use crate::node::errors::VideoDownloadError;
+use crate::node::video_download_error::VideoDownloadError;
 use String;
 use tonic;
 use tonic::codegen::tokio_stream::StreamExt;
