@@ -4,6 +4,7 @@ use crate::node::video_download_error::VideoDownloadError;
 use String;
 use tonic;
 use tonic::codegen::tokio_stream::StreamExt;
+use std::time::Instant;
 
 mod proto {
     tonic::include_proto!("node");
@@ -37,6 +38,7 @@ impl Node {
     }
 
     pub async fn get_video(&mut self, path: &str) -> Result<Vec<u8>, VideoDownloadError> {
+        let start = Instant::now();
         let client = self.client.as_mut().unwrap();
 
         let request = StreamVideoRequest { path: String::from(path) };
@@ -49,12 +51,14 @@ impl Node {
             video.append(&mut unwrapped_response);
         }
 
+        println!("It took {:.2?} to download video a of {} bytes", start.elapsed(), video.len());
+
         Ok(video)
     }
 
     fn get_connection_string(&self) -> String {
         //String::from("grcp://[") + self.host.as_str() + "]:"  + &self.port.to_string()
-        let connection_string = String::from("http://192.168.100.9:50051");
+        let connection_string = String::from("http://10.8.0.6:50051");
         return connection_string
     }
 }

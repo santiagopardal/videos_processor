@@ -13,6 +13,7 @@ use consumer::message_handling_error::MessageHandlingError;
 use api::node;
 use crate::{api, consumer};
 use consumer::node_creation_error::NodeCreationError;
+use crate::structs::temporal_video_message::TemporalVideoMessage;
 
 pub struct TemporalVideosConsumer {
     node: HashMap<u32, Node>
@@ -38,15 +39,16 @@ impl TemporalVideosConsumer {
 
     async fn handle_new_video(
         &mut self,
-        node_id: u32,
-        camera_id: u32,
-        path: &str,
-        date: &str,
-        time: &str
+        temporal_video_message: TemporalVideoMessage
     ) -> Result<(), MessageHandlingError> {
-        let node = self.get_node(node_id).await?;
-        let video_bytes: Vec<u8> = node.get_video(path).await?;
-        self.save_video(video_bytes, camera_id, date, time).await?;
+        let node = self.get_node(temporal_video_message.node_id).await?;
+        let video_bytes: Vec<u8> = node.get_video(&temporal_video_message.path).await?;
+        self.save_video(
+            video_bytes,
+            temporal_video_message.camera_id,
+            &temporal_video_message.video_date,
+            &temporal_video_message.video_time
+        ).await?;
 
         Ok(())
     }
@@ -82,18 +84,20 @@ impl AsyncConsumer for TemporalVideosConsumer {
         let message: &str = str::from_utf8(&content).unwrap();
         let json_data: serde_json::Value = serde_json::from_str(&message).unwrap();
 
-        let node_id = json_data["node"].as_i64().unwrap() as u32;
-        let camera_id = json_data["camera"].as_i64().unwrap() as u32;
-        let path = json_data["path"].as_str().unwrap();
-        let video_date = json_data["date"].as_str().unwrap();
-        let video_time = json_data["time"].as_str().unwrap().replace(":", "-");
+        let temporal_video_message = TemporalVideoMessage::from_json(json_data);
+        let mut has_errors = true;
 
-        let handling_result = self.handle_new_video(node_id, camera_id, path, video_date, &video_time).await;
+        if temporal_video_message.is_ok() {
+            let handling_result = self.handle_new_video(temporal_video_message.unwrap()).await;
 
-        if handling_result.is_ok() {
-            let args = BasicAckArguments::new(deliver.delivery_tag(), false);
-            channel.basic_ack(args).await.unwrap();
-        } else {
+            if handling_result.is_ok() {
+                has_errors = false;
+                let args = BasicAckArguments::new(deliver.delivery_tag(), false);
+                channel.basic_ack(args).await.unwrap();
+            }
+        }
+
+        if has_errors {
             let args = BasicRejectArguments::new(deliver.delivery_tag(), true);
             channel.basic_reject(args).await.unwrap();
         }
