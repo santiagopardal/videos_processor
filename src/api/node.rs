@@ -1,12 +1,15 @@
-use crate::api::api::call_api;
+use crate::api::api;
+use crate::api::api_call_error::APICallError;
 use crate::node::node::Node;
 
-pub async fn get_node(node_id: u32) -> Node {
+pub async fn get_node(node_id: u32) -> Result<Node, APICallError> {
     let endpoint = String::from("/node/") + &node_id.to_string();
-    let response = call_api(&endpoint).await;
+    let response = api::call_api(&endpoint).await?;
 
-    return Node::new(
+    let node = Node::new(
         response["ip"].as_str().unwrap(),
         response["port"].as_i64().unwrap() as u16
     );
+
+    Ok(node)
 }

@@ -18,10 +18,10 @@ use tokio::sync::Notify;
 use tracing_subscriber::{fmt, prelude::*};
 use consumer::temporal_videos_consumer::TemporalVideosConsumer;
 
-pub mod consumer;
-pub mod api;
-pub mod structs;
-pub mod node;
+mod consumer;
+mod structs;
+mod api;
+mod node;
 
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
@@ -31,7 +31,7 @@ async fn main() {
     let rabbit_password = env::var("RABBIT_PASSWORD").unwrap();
     let exchange_name = env::var("EXCHANGE_NAME").unwrap();
 
-    let cameras: Vec<structs::camera::Camera> = api::cameras::get_all_cameras().await;
+    let cameras: Vec<structs::camera::Camera> = api::cameras::get_all_cameras().await.unwrap();
 
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

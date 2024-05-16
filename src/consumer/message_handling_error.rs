@@ -1,4 +1,5 @@
 use std::io;
+use crate::consumer::node_creation_error::NodeCreationError;
 use crate::node::video_download_error::VideoDownloadError;
 
 pub enum MessageHandlingError {
@@ -19,8 +20,8 @@ impl From<VideoDownloadError> for MessageHandlingError {
     }
 }
 
-impl From<tonic::transport::Error> for MessageHandlingError {
-    fn from(_: tonic::transport::Error) -> Self {
+impl From<NodeCreationError> for MessageHandlingError {
+    fn from(_: NodeCreationError) -> Self {
         return MessageHandlingError::NodeConnectionError;
     }
 }

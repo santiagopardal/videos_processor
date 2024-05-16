@@ -12,6 +12,7 @@ use std::collections::HashMap;
 use consumer::message_handling_error::MessageHandlingError;
 use api::node;
 use crate::{api, consumer};
+use consumer::node_creation_error::NodeCreationError;
 
 pub struct TemporalVideosConsumer {
     node: HashMap<u32, Node>
@@ -23,9 +24,9 @@ impl TemporalVideosConsumer {
         return Self { node };
     }
 
-    async fn get_node(&mut self, node_id: u32) -> Result<&mut Node, tonic::transport::Error> {
+    async fn get_node(&mut self, node_id: u32) -> Result<&mut Node, NodeCreationError> {
         if !self.node.contains_key(&node_id) {
-            let fetched_node = node::get_node(node_id).await;
+            let fetched_node = node::get_node(node_id).await?;
             self.node.insert(node_id, fetched_node);
         }
 
