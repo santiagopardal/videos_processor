@@ -28,11 +28,11 @@ pub fn build_from_json(camera_json: &serde_json::Value) -> Camera {
     let streaming_port: Option<u16>;
 
     if camera_json["streaming_port"].as_i64().is_some() {
-        streaming_port = Option::Some(
+        streaming_port = Some(
             camera_json["streaming_port"].as_i64().unwrap() as u16
         )
     } else {
-        streaming_port = Option::None;
+        streaming_port = None;
     }
 
     return Camera {
