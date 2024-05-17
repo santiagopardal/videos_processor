@@ -20,7 +20,6 @@ use consumer::temporal_videos_consumer::TemporalVideosConsumer;
 use camera::camera::Camera;
 
 mod consumer;
-mod json_utils;
 mod api;
 mod node;
 mod camera;

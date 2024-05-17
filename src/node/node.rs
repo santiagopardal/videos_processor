@@ -5,34 +5,21 @@ use String;
 use tonic;
 use tonic::codegen::tokio_stream::StreamExt;
 use std::time::Instant;
-use crate::json_utils::json_field_missing_error::JSONFieldMissingError;
-use crate::json_utils::json_utils;
-
-const NODE_REQUIRED_FIELDS: [&str; 2] = ["host", "port"];
+use serde::{Deserialize};
 
 mod proto {
     tonic::include_proto!("node");
 }
 
+#[derive(Deserialize)]
 pub struct Node {
-    host: String,
+    ip: String,
     port: u16,
+    #[serde(skip_deserializing)]
     client: Option<NodeClient<tonic::transport::Channel>>
 }
 
 impl Node {
-    pub fn from_json(json: &serde_json::Value) -> Result<Self, JSONFieldMissingError> {
-        json_utils::validate_keys_in_json(json, Vec::from(NODE_REQUIRED_FIELDS))?;
-
-        let node = Self {
-            host: String::from(json["host"].as_str().unwrap()),
-            port: json["port"].as_i64().unwrap() as u16,
-            client: None
-        };
-
-        Ok(node)
-    }
-
     pub async fn connect(&mut self) -> Result<(), tonic::transport::Error> {
         if self.client.is_none() {
             self.client = Some(

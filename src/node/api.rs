@@ -6,7 +6,7 @@ pub async fn get_node(node_id: u32) -> Result<Node, APICallError> {
     let endpoint = String::from("/node/") + &node_id.to_string();
     let response = api::call_api(&endpoint).await?;
 
-    let node = Node::from_json(&response).unwrap();
+    let node: Node = serde_json::from_str(&response)?;
 
     Ok(node)
 }

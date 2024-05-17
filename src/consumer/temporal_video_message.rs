@@ -1,27 +1,44 @@
-use crate::json_utils::json_field_missing_error::JSONFieldMissingError;
-use crate::json_utils::json_utils;
+use std::fmt::Formatter;
+use serde::{Serialize, Deserialize, Deserializer};
+use serde::de::{Error, Visitor};
 
-const REQUIRED_PROPERTIES: [&str; 5] = ["node", "camera", "path", "date", "time"];
 
-pub struct TemporalVideoMessage {
-    pub node_id: u32,
-    pub camera_id: u32,
-    pub path: String,
-    pub video_date: String,
-    pub video_time: String
+struct StringTimeVisitor;
+
+impl<'de> Visitor<'de> for StringTimeVisitor {
+    type Value = String;
+
+    fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {
+        formatter.write_str("a string")
+    }
+
+    fn visit_string<E>(self, v: String) -> Result<Self::Value, E> where E: Error {
+        Ok(v.replace(":", "-"))
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E> where E: Error {
+        Ok(v.replace(":", "-"))
+    }
 }
 
-impl TemporalVideoMessage {
-    pub fn from_json(temporal_video: &serde_json::Value) -> Result<Self, JSONFieldMissingError> {
-        json_utils::validate_keys_in_json(&temporal_video, Vec::from(REQUIRED_PROPERTIES))?;
 
-        let node_id = temporal_video["node"].as_i64().unwrap() as u32;
-        let camera_id = temporal_video["camera"].as_i64().unwrap() as u32;
-        let path = String::from(temporal_video["path"].as_str().unwrap());
+fn time_deserializer<'de, D>(deserializer: D) -> Result<String, D::Error>
+    where D: Deserializer<'de>,
+{
+    deserializer.deserialize_str(StringTimeVisitor)
+}
 
-        let video_date = String::from(temporal_video["date"].as_str().unwrap());
-        let video_time = temporal_video["time"].as_str().unwrap().replace(":", "-");
 
-        Ok(TemporalVideoMessage { node_id, camera_id, path, video_date, video_time })
-    }
+#[derive(Serialize, Deserialize)]
+pub struct TemporalVideoMessage {
+    #[serde(alias = "node")]
+    pub node_id: u32,
+    #[serde(alias = "camera")]
+    pub camera_id: u32,
+    pub path: String,
+    #[serde(alias = "date")]
+    pub video_date: String,
+    #[serde(alias = "time")]
+    #[serde(deserialize_with = "time_deserializer")]
+    pub video_time: String
 }

@@ -5,12 +5,7 @@ use crate::camera::camera::Camera;
 pub async fn get_all_cameras() -> Result<Vec<Camera>, APICallError> {
     let api_response = api::call_api("/cameras").await?;
 
-    let mut cameras: Vec<Camera> = vec![];
-
-    for camera_json in api_response.as_array().unwrap() {
-        let camera = Camera::from_json(camera_json).unwrap();
-        cameras.push(camera);
-    }
+    let cameras: Vec<Camera> = serde_json::from_str(&api_response).unwrap();
 
     Ok(cameras)
 }

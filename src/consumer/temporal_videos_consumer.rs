@@ -82,9 +82,8 @@ impl AsyncConsumer for TemporalVideosConsumer {
         content: Vec<u8>,
     ) {
         let message: &str = str::from_utf8(&content).unwrap();
-        let json_data: serde_json::Value = serde_json::from_str(&message).unwrap();
 
-        let temporal_video_message = TemporalVideoMessage::from_json(&json_data);
+        let temporal_video_message: serde_json::Result<TemporalVideoMessage> = serde_json::from_str(message);
         let mut has_errors = true;
 
         if temporal_video_message.is_ok() {
