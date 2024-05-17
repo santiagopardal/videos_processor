@@ -1,4 +1,5 @@
-use crate::structs::json_field_missing_error::JSONFieldMissingError;
+use crate::json_utils::json_field_missing_error::JSONFieldMissingError;
+use crate::json_utils::json_utils;
 
 const REQUIRED_PROPERTIES: [&str; 5] = ["node", "camera", "path", "date", "time"];
 
@@ -11,12 +12,8 @@ pub struct TemporalVideoMessage {
 }
 
 impl TemporalVideoMessage {
-    pub fn from_json(temporal_video: serde_json::Value) -> Result<Self, JSONFieldMissingError> {
-        for property in REQUIRED_PROPERTIES {
-            if temporal_video[property].is_null() {
-                return Err(JSONFieldMissingError { field_name: String::from(property) });
-            }
-        }
+    pub fn from_json(temporal_video: &serde_json::Value) -> Result<Self, JSONFieldMissingError> {
+        json_utils::validate_keys_in_json(&temporal_video, Vec::from(REQUIRED_PROPERTIES))?;
 
         let node_id = temporal_video["node"].as_i64().unwrap() as u32;
         let camera_id = temporal_video["camera"].as_i64().unwrap() as u32;

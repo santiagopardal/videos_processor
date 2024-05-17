@@ -17,11 +17,13 @@ use amqprs::{
 use tokio::sync::Notify;
 use tracing_subscriber::{fmt, prelude::*};
 use consumer::temporal_videos_consumer::TemporalVideosConsumer;
+use camera::camera::Camera;
 
 mod consumer;
-mod structs;
+mod json_utils;
 mod api;
 mod node;
+mod camera;
 
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
@@ -31,7 +33,7 @@ async fn main() {
     let rabbit_password = env::var("RABBIT_PASSWORD").unwrap();
     let exchange_name = env::var("EXCHANGE_NAME").unwrap();
 
-    let cameras: Vec<structs::camera::Camera> = api::cameras::get_all_cameras().await.unwrap();
+    let cameras: Vec<Camera> = camera::api::get_all_cameras().await.unwrap();
 
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

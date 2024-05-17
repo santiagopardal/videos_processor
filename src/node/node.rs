@@ -5,6 +5,10 @@ use String;
 use tonic;
 use tonic::codegen::tokio_stream::StreamExt;
 use std::time::Instant;
+use crate::json_utils::json_field_missing_error::JSONFieldMissingError;
+use crate::json_utils::json_utils;
+
+const NODE_REQUIRED_FIELDS: [&str; 2] = ["host", "port"];
 
 mod proto {
     tonic::include_proto!("node");
@@ -17,12 +21,16 @@ pub struct Node {
 }
 
 impl Node {
-    pub fn new(host: &str, port: u16) -> Self {
-        return Self {
-            host: String::from(host),
-            port,
+    pub fn from_json(json: &serde_json::Value) -> Result<Self, JSONFieldMissingError> {
+        json_utils::validate_keys_in_json(json, Vec::from(NODE_REQUIRED_FIELDS))?;
+
+        let node = Self {
+            host: String::from(json["host"].as_str().unwrap()),
+            port: json["port"].as_i64().unwrap() as u16,
             client: None
-        }
+        };
+
+        Ok(node)
     }
 
     pub async fn connect(&mut self) -> Result<(), tonic::transport::Error> {

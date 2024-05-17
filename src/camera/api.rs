@@ -1,14 +1,14 @@
 use crate::api::api;
 use crate::api::api_call_error::APICallError;
-use super::super::structs::camera;
+use crate::camera::camera::Camera;
 
-pub async fn get_all_cameras() -> Result<Vec<camera::Camera>, APICallError> {
+pub async fn get_all_cameras() -> Result<Vec<Camera>, APICallError> {
     let api_response = api::call_api("/cameras").await?;
 
-    let mut cameras: Vec<camera::Camera> = vec![];
+    let mut cameras: Vec<Camera> = vec![];
 
     for camera_json in api_response.as_array().unwrap() {
-        let camera = camera::build_from_json(camera_json);
+        let camera = Camera::from_json(camera_json).unwrap();
         cameras.push(camera);
     }
 
