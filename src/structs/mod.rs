@@ -1,3 +1,3 @@
-pub mod camera;
-pub mod temporal_video_message;
-pub mod json_field_missing_error;
+pub(crate) mod camera;
+pub(crate) mod temporal_video_message;
+pub(crate) mod json_field_missing_error;
