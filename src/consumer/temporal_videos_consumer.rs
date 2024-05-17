@@ -97,6 +97,7 @@ impl AsyncConsumer for TemporalVideosConsumer {
         }
 
         if has_errors {
+            println!("Error with {}", message);
             let args = BasicRejectArguments::new(deliver.delivery_tag(), true);
             channel.basic_reject(args).await.unwrap();
         }

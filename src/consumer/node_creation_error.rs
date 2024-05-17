@@ -1,5 +1,6 @@
 use crate::api::api_call_error;
 
+#[derive(Debug)]
 pub enum NodeCreationError {
     ConnectionError(tonic::transport::Error),
     NodeRetrievalError(api_call_error::APICallError)
