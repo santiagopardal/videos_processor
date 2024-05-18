@@ -18,6 +18,7 @@ use tokio::sync::Notify;
 use tracing_subscriber::{fmt, prelude::*};
 use consumer::temporal_videos_consumer::TemporalVideosConsumer;
 use camera::camera::Camera;
+use crate::node::node_pool::NodePool;
 
 mod consumer;
 mod api;
@@ -90,7 +91,8 @@ async fn main() {
         .manual_ack(true)
         .finish();
 
-    let consumer = TemporalVideosConsumer::new().await;
+    let node_pool = NodePool::new();
+    let consumer = TemporalVideosConsumer::new(node_pool);
 
     channel
         .basic_consume(consumer, args)

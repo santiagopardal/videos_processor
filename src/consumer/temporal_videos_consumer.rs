@@ -5,43 +5,27 @@ use async_trait::async_trait;
 use std::{io, str};
 use std::path::PathBuf;
 use serde_json;
-use crate::node::node::Node;
 use tokio;
 use tokio::io::AsyncWriteExt;
-use std::collections::HashMap;
 use consumer::message_handling_error::MessageHandlingError;
-use crate::node;
 use crate::consumer;
-use consumer::node_creation_error::NodeCreationError;
 use crate::consumer::temporal_video_message::TemporalVideoMessage;
+use crate::node::node_pool::NodePool;
 
 pub struct TemporalVideosConsumer {
-    node: HashMap<u32, Node>
+    node_pool: NodePool
 }
 
 impl TemporalVideosConsumer {
-    pub async fn new() -> Self {
-        let node = HashMap::new();
-        return Self { node };
-    }
-
-    async fn get_node(&mut self, node_id: &u32) -> Result<&mut Node, NodeCreationError> {
-        if !self.node.contains_key(&node_id) {
-            let fetched_node = node::api::get_node(node_id).await?;
-            self.node.insert(node_id.clone(), fetched_node);
-        }
-
-        let node = self.node.get_mut(&node_id).unwrap();
-        let _ = node.connect().await?;
-
-        Ok(node)
+    pub fn new(node_pool: NodePool) -> Self {
+        return Self { node_pool };
     }
 
     async fn handle_new_video(
         &mut self,
         temporal_video_message: TemporalVideoMessage
     ) -> Result<(), MessageHandlingError> {
-        let node = self.get_node(&temporal_video_message.node_id).await?;
+        let node = self.node_pool.get_node(&temporal_video_message.node_id).await?;
         let video_bytes: Vec<u8> = node.get_video(&temporal_video_message.path).await?;
         self.save_video(
             video_bytes,

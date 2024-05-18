@@ -53,7 +53,8 @@ impl Node {
 
     fn get_connection_string(&self) -> String {
         //String::from("grcp://[") + self.host.as_str() + "]:"  + &self.port.to_string()
-        let connection_string = String::from("http://192.168.100.9:50051");
+        let host = std::env::var("RABBIT_HOST").unwrap();
+        let connection_string = String::from("http://") + &host + &String::from(":50051");
         return connection_string
     }
 }
