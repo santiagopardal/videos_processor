@@ -25,10 +25,10 @@ impl TemporalVideosConsumer {
         return Self { node };
     }
 
-    async fn get_node(&mut self, node_id: u32) -> Result<&mut Node, NodeCreationError> {
+    async fn get_node(&mut self, node_id: &u32) -> Result<&mut Node, NodeCreationError> {
         if !self.node.contains_key(&node_id) {
             let fetched_node = node::api::get_node(node_id).await?;
-            self.node.insert(node_id, fetched_node);
+            self.node.insert(node_id.clone(), fetched_node);
         }
 
         let node = self.node.get_mut(&node_id).unwrap();
@@ -41,7 +41,7 @@ impl TemporalVideosConsumer {
         &mut self,
         temporal_video_message: TemporalVideoMessage
     ) -> Result<(), MessageHandlingError> {
-        let node = self.get_node(temporal_video_message.node_id).await?;
+        let node = self.get_node(&temporal_video_message.node_id).await?;
         let video_bytes: Vec<u8> = node.get_video(&temporal_video_message.path).await?;
         self.save_video(
             video_bytes,
