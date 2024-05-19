@@ -45,35 +45,18 @@ async fn main() {
         .ok();
 
     let connection = Connection::open(
-        &OpenConnectionArguments::new(
-            rabbit_host.as_str(),
-            5672,
-            rabbit_user.as_str(),
-            rabbit_password.as_str(),
-        )
-    )
-        .await
-        .unwrap();
+        &OpenConnectionArguments::new(&rabbit_host, 5672, &rabbit_user, &rabbit_password)
+    ).await.unwrap();
 
-    connection
-        .register_callback(DefaultConnectionCallback)
-        .await
-        .unwrap();
+    connection.register_callback(DefaultConnectionCallback).await.unwrap();
 
     let channel = connection.open_channel(None).await.unwrap();
-    channel
-        .register_callback(DefaultChannelCallback)
-        .await
-        .unwrap();
+    channel.register_callback(DefaultChannelCallback).await.unwrap();
 
     let mut queue = QueueDeclareArguments::new("testing_queue");
     queue.durable(true);
 
-    let (queue_name, _, _) = channel
-        .queue_declare(queue)
-        .await
-        .unwrap()
-        .unwrap();
+    let (queue_name, _, _) = channel.queue_declare(queue).await.unwrap().unwrap();
 
     for camera in cameras {
         println!("Binding camera '{}' with id: {}", camera.name, camera.id);
