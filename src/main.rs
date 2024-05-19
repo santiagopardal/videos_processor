@@ -28,6 +28,7 @@ mod camera;
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
 async fn main() {
+    node::api::register().await.unwrap();
     let rabbit_host = env::var("RABBIT_HOST").unwrap();
     let rabbit_user = env::var("RABBIT_USER").unwrap();
     let rabbit_password = env::var("RABBIT_PASSWORD").unwrap();
