@@ -4,10 +4,12 @@ use amqprs::{
     channel::{ Channel, BasicConsumeArguments, QueueBindArguments, QueueDeclareArguments },
     connection::{ Connection, OpenConnectionArguments }
 };
-use tokio::sync::Notify;
+use tokio::{ sync::Notify, fs };
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tracing_subscriber::{fmt, prelude::*};
 use crate::consumer::temporal_videos_consumer::TemporalVideosConsumer;
 use crate::camera::camera::Camera;
+use crate::node::node::Node;
 use crate::node::node_pool::NodePool;
 
 mod consumer;
@@ -16,9 +18,34 @@ mod node;
 mod camera;
 
 
+async fn login_or_register() -> Node {
+    let node: Node;
+
+    if !fs::try_exists("node.json").await.unwrap() {
+        node = node::api::register().await.unwrap();
+
+        let mut file = fs::File::create("node.json").await.unwrap();
+
+        let node_as_string = serde_json::to_string(&node).unwrap();
+        let bytes: Vec<u8> = node_as_string.bytes().collect();
+
+        file.write(&bytes).await.unwrap();
+    } else {
+        let mut node_file = fs::File::open("node.json").await.unwrap();
+        let mut node_data: String = String::new();
+        node_file.read_to_string(&mut node_data).await.unwrap();
+
+        node = serde_json::from_str(&node_data).unwrap();
+    }
+
+    return node;
+}
+
+
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
 async fn main() {
-    node::api::register().await.unwrap();
+    let _: Node = login_or_register().await;
+
     let rabbit_host = env::var("RABBIT_HOST").unwrap();
     let rabbit_user = env::var("RABBIT_USER").unwrap();
     let rabbit_password = env::var("RABBIT_PASSWORD").unwrap();

@@ -1,7 +1,7 @@
 use proto::{ node_client::NodeClient, StreamVideoRequest };
 use tonic::{ codegen::tokio_stream::StreamExt };
 use std::time::Instant;
-use serde::{Deserialize};
+use serde::{ Serialize, Deserialize };
 
 use crate::node::video_download_error::VideoDownloadError;
 
@@ -9,11 +9,15 @@ mod proto {
     tonic::include_proto!("node");
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Node {
+    id: u32,
     ip: String,
     port: u16,
+    #[serde(alias = "type")]
+    node_type: String,
     #[serde(skip_deserializing)]
+    #[serde(skip_serializing)]
     client: Option<NodeClient<tonic::transport::Channel>>
 }
 

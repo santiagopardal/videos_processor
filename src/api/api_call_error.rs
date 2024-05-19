@@ -3,7 +3,11 @@ use std::fmt::{ Debug };
 #[derive(Debug)]
 pub enum APICallError {
     JSONDecodeError(serde_json::error::Error),
-    RequestError(reqwest::Error)
+    RequestError(reqwest::Error),
+    Status {
+        status: reqwest::StatusCode,
+        response: serde_json::Value
+    }
 }
 
 impl From<reqwest::Error> for APICallError {
