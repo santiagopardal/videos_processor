@@ -11,11 +11,11 @@ impl<'de> Visitor<'de> for StringTimeVisitor {
         formatter.write_str("a string")
     }
 
-    fn visit_string<E>(self, v: String) -> Result<Self::Value, E> where E: Error {
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E> where E: Error {
         Ok(v.replace(":", "-"))
     }
 
-    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E> where E: Error {
+    fn visit_string<E>(self, v: String) -> Result<Self::Value, E> where E: Error {
         Ok(v.replace(":", "-"))
     }
 }
