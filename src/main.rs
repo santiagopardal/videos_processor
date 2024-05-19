@@ -80,7 +80,7 @@ async fn main() {
         channel
             .queue_bind(QueueBindArguments::new(
                 &queue_name,
-                exchange_name.as_str(),
+                &exchange_name,
                 &camera.id.to_string(),
             ))
             .await
