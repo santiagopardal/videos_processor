@@ -1,5 +1,4 @@
-use std::fmt::Debug;
-use std::io;
+use std::{ fmt::Debug, io};
 use crate::consumer::node_creation_error::NodeCreationError;
 use crate::node::video_download_error::VideoDownloadError;
 

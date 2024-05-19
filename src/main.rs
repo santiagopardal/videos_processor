@@ -1,23 +1,13 @@
 use std::env;
 use amqprs::{
-    callbacks::{
-        DefaultChannelCallback,
-        DefaultConnectionCallback
-    },
-    channel::{
-        BasicConsumeArguments,
-        QueueBindArguments,
-        QueueDeclareArguments,
-    },
-    connection::{
-        Connection,
-        OpenConnectionArguments
-    }
+    callbacks::{ DefaultChannelCallback, DefaultConnectionCallback },
+    channel::{ Channel, BasicConsumeArguments, QueueBindArguments, QueueDeclareArguments },
+    connection::{ Connection, OpenConnectionArguments }
 };
 use tokio::sync::Notify;
 use tracing_subscriber::{fmt, prelude::*};
-use consumer::temporal_videos_consumer::TemporalVideosConsumer;
-use camera::camera::Camera;
+use crate::consumer::temporal_videos_consumer::TemporalVideosConsumer;
+use crate::camera::camera::Camera;
 use crate::node::node_pool::NodePool;
 
 mod consumer;
@@ -51,10 +41,10 @@ async fn main() {
 
     connection.register_callback(DefaultConnectionCallback).await.unwrap();
 
-    let channel = connection.open_channel(None).await.unwrap();
+    let channel: Channel = connection.open_channel(None).await.unwrap();
     channel.register_callback(DefaultChannelCallback).await.unwrap();
 
-    let mut queue = QueueDeclareArguments::new("testing_queue");
+    let mut queue: QueueDeclareArguments = QueueDeclareArguments::new("testing_queue");
     queue.durable(true);
 
     let (queue_name, _, _) = channel.queue_declare(queue).await.unwrap().unwrap();
@@ -71,7 +61,8 @@ async fn main() {
             .unwrap();
     }
 
-    let args = BasicConsumeArguments::new(&queue_name, "basic_consumer")
+    let args: BasicConsumeArguments =
+        BasicConsumeArguments::new(&queue_name, "basic_consumer")
         .manual_ack(true)
         .finish();
 

@@ -1,11 +1,9 @@
-use proto::node_client::NodeClient;
-use proto::StreamVideoRequest;
-use crate::node::video_download_error::VideoDownloadError;
-use String;
-use tonic;
-use tonic::codegen::tokio_stream::StreamExt;
+use proto::{ node_client::NodeClient, StreamVideoRequest };
+use tonic::{ codegen::tokio_stream::StreamExt };
 use std::time::Instant;
 use serde::{Deserialize};
+
+use crate::node::video_download_error::VideoDownloadError;
 
 mod proto {
     tonic::include_proto!("node");
@@ -23,9 +21,7 @@ impl Node {
     pub async fn connect(&mut self) -> Result<(), tonic::transport::Error> {
         if self.client.is_none() {
             self.client = Some(
-                NodeClient::connect(
-                    self.get_connection_string()
-                ).await?
+                NodeClient::connect(self.get_connection_string()).await?
             )
         }
 
@@ -33,11 +29,14 @@ impl Node {
     }
 
     pub async fn get_video(&mut self, path: &str) -> Result<Vec<u8>, VideoDownloadError> {
-        let start = Instant::now();
-        let client = self.client.as_mut().unwrap();
+        let start: Instant = Instant::now();
+        let client: &mut NodeClient<tonic::transport::Channel> = self.client.as_mut().unwrap();
 
         let request = StreamVideoRequest { path: String::from(path) };
-        let mut stream = client.stream_video(request).await?.into_inner();
+
+        let mut stream: tonic::Streaming<Vec<u8>> = client.stream_video(request)
+            .await?
+            .into_inner();
 
         let mut video: Vec<u8> = vec![];
 
@@ -54,7 +53,8 @@ impl Node {
     fn get_connection_string(&self) -> String {
         //String::from("grcp://[") + self.host.as_str() + "]:"  + &self.port.to_string()
         let host = std::env::var("RABBIT_HOST").unwrap();
-        let connection_string = String::from("http://") + &host + &String::from(":50051");
+        let connection_string: String =
+            String::from("http://") + &host + &String::from(":50051");
         return connection_string
     }
 }
