@@ -41,8 +41,8 @@ impl Node {
         let mut video: Vec<u8> = vec![];
 
         while let Some(response) = stream.next().await {
-            let mut unwrapped_response = response?;
-            video.append(&mut unwrapped_response);
+            let mut bytes = response?;
+            video.append(&mut bytes);
         }
 
         println!("It took {:.2?} to download video a of {} bytes", start.elapsed(), video.len());
