@@ -12,14 +12,13 @@ pub async fn get_node(node_id: &u32) -> Result<Node, APICallError> {
 }
 
 pub async fn register() -> Result<(), APICallError> {
-    let endpoint = String::from("/node/");
     let body = serde_json::json!(
         {
             "port": 50051,
             "type": "PROCESSOR"
         }
     );
-    let _ = api::post_api(&endpoint, body).await?;
+    let _ = api::post_api("/node/", body).await?;
 
     Ok(())
 }
