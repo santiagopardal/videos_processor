@@ -1,12 +1,6 @@
 use serde::{ Deserialize, Serialize };
 
 #[derive(Serialize, Deserialize)]
-pub struct CameraConfigurations {
-    pub recording: bool,
-    pub sensitivity: f32
-}
-
-#[derive(Serialize, Deserialize)]
 pub struct Camera {
     pub id: u32,
     pub model: String,
@@ -21,5 +15,6 @@ pub struct Camera {
     pub name: String,
     #[serde(alias = "nodeId")]
     pub node_id: u32,
-    pub configurations: CameraConfigurations
+    pub recording: bool,
+    pub sensitivity: f32,
 }
