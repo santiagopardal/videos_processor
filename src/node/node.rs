@@ -11,7 +11,7 @@ mod proto {
 
 #[derive(Serialize, Deserialize)]
 pub struct Node {
-    id: u32,
+    pub id: u32,
     ip: String,
     port: u16,
     #[serde(alias = "type")]

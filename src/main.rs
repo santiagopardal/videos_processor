@@ -44,14 +44,14 @@ async fn login_or_register() -> Node {
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 2)]
 async fn main() {
-    let _: Node = login_or_register().await;
+    let node: Node = login_or_register().await;
 
     let rabbit_host = env::var("RABBIT_HOST").unwrap();
     let rabbit_user = env::var("RABBIT_USER").unwrap();
     let rabbit_password = env::var("RABBIT_PASSWORD").unwrap();
     let exchange_name = env::var("EXCHANGE_NAME").unwrap();
 
-    let cameras: Vec<Camera> = camera::api::get_all_cameras().await.unwrap();
+    let cameras: Vec<Camera> = camera::api::get_all_cameras_in_node(&node.id).await.unwrap();
 
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

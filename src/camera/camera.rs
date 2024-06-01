@@ -1,4 +1,5 @@
 use serde::{ Deserialize, Serialize };
+use crate::node::node::Node;
 
 #[derive(Serialize, Deserialize)]
 pub struct Camera {
@@ -13,8 +14,7 @@ pub struct Camera {
     pub height: u16,
     pub framerate: u16,
     pub name: String,
-    #[serde(alias = "nodeId")]
-    pub node_id: u32,
+    pub nodes: Vec<Node>,
     pub recording: bool,
     pub sensitivity: f32,
 }
